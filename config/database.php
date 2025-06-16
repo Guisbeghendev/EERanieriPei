@@ -143,7 +143,7 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'phpredis'), // Por padrão Laravel usa phpredis. Se quiser usar Predis, defina REDIS_CLIENT=predis no .env.
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
