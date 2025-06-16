@@ -18,17 +18,18 @@ Route::get('/', function () {
 // Outras rotas públicas
 Route::get('/sobre-a-escola', function () {
     return Inertia::render('Sobre/SobreEscola');
-})->name('sobre-a-escola'); // Rota para "Sobre a Escola" agora está ativa!
+})->name('sobre-a-escola');
+
+Route::get('/gremio', function () {
+    return Inertia::render('Gremio/Gremio');
+})->name('gremio'); // Rota para "Grêmio" agora está ativa!
+
 
 /*
 // Outras rotas públicas (comentadas por enquanto)
 Route::get('/coralranieri', function () {
     return Inertia::render('Coral/CoralRanieri');
 })->name('coral-ranieri');
-
-Route::get('/gremio', function () {
-    return Inertia::render('Gremio/Gremio');
-})->name('gremio');
 
 Route::get('/brincandodialogando', function () {
     return Inertia::render('BrincandoDialogando/BrincandoDialogando');

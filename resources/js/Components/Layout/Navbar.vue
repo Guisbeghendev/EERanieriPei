@@ -83,13 +83,13 @@
                         </Link>
                     </li>
                     <li>
-                        <Link href="/coral-ranieri" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
-                            Coral Ranieri
+                        <Link href="/gremio" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
+                            Grêmio
                         </Link>
                     </li>
                     <li>
-                        <Link href="/gremio" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
-                            Grêmio
+                        <Link href="/coral-ranieri" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
+                            Coral Ranieri
                         </Link>
                     </li>
                     <li>
