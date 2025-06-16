@@ -30,15 +30,11 @@ Route::get('/brincando-dialogando', function () {
 
 Route::get('/simoninhanacozinha', function () {
     return Inertia::render('Simoninhanacozinha/Simoninhanacozinha');
-})->name('simoninhanacozinha'); // Rota para "Simoninha na Cozinha" agora está ativa!
+})->name('simoninhanacozinha');
 
-
-/*
-// Outras rotas públicas (comentadas por enquanto)
-Route::get('/coralranieri', function () {
+Route::get('/coral-ranieri', function () {
     return Inertia::render('Coral/CoralRanieri');
-})->name('coral-ranieri');
-*/
+})->name('coral-ranieri'); // Rota para "Coral Ranieri" agora está ativa!
 
 
 /*

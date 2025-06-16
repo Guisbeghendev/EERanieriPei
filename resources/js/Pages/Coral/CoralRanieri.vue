@@ -86,35 +86,36 @@ const goToNext = () => {
         <Head title="Coral Ranieri" />
 
         <template #title>
-            <h1>Coral Ranieri</h1>
+            <h1 class="text-roxo2 dark:text-roxo2-hover font-extrabold tracking-tight text-4xl lg:text-5xl drop-shadow-md">
+                Coral Ranieri
+            </h1>
         </template>
 
         <div class="py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 md:p-8 lg:p-10">
-                <!-- Título do Capítulo Atual -->
-                <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">{{ currentChapter.title }}</h2>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-2xl shadow-xl p-8 md:p-10 lg:p-12 border border-gray-100 dark:border-gray-700">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-roxo2 dark:text-roxo2-hover mb-6 leading-tight text-center drop-shadow-sm">
+                    {{ currentChapter.title }}
+                </h2>
 
-                <!-- Conteúdo do Capítulo Atual (usa v-html para renderizar HTML). -->
-                <div class="text-gray-700 leading-relaxed mb-8" v-html="currentChapter.content"></div>
+                <div class="text-gray-700 dark:text-gray-300 leading-relaxed text-lg mb-8" v-html="currentChapter.content"></div>
 
-                <!-- Controles de Paginação -->
-                <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-200">
+                <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                         @click="goToPrevious"
                         :disabled="!hasPrevious"
-                        class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                        class="px-6 py-2 bg-laranja1 text-prata1 font-semibold rounded-lg shadow-md hover:bg-laranja1-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105"
                     >
                         Anterior
                     </button>
 
-                    <span class="text-gray-600 text-sm">
+                    <span class="text-gray-600 dark:text-gray-400 text-sm">
                         Capítulo {{ currentPage + 1 }} de {{ totalChapters }}
                     </span>
 
                     <button
                         @click="goToNext"
                         :disabled="!hasNext"
-                        class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                        class="px-6 py-2 bg-laranja1 text-prata1 font-semibold rounded-lg shadow-md hover:bg-laranja1-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:scale-105"
                     >
                         Próximo
                     </button>
@@ -124,3 +125,7 @@ const goToNext = () => {
         </div>
     </AppLayout>
 </template>
+
+<style scoped>
+/* Adicione estilos específicos para esta página se necessário */
+</style>
