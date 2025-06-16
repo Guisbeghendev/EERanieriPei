@@ -22,7 +22,11 @@ Route::get('/sobre-a-escola', function () {
 
 Route::get('/gremio', function () {
     return Inertia::render('Gremio/Gremio');
-})->name('gremio'); // Rota para "Grêmio" agora está ativa!
+})->name('gremio');
+
+Route::get('/brincando-dialogando', function () {
+    return Inertia::render('BrincandoDialogando/BrincandoDialogando');
+})->name('brincando-dialogando'); // Rota para "Brincando & Dialogando" agora está ativa!
 
 
 /*
@@ -30,10 +34,6 @@ Route::get('/gremio', function () {
 Route::get('/coralranieri', function () {
     return Inertia::render('Coral/CoralRanieri');
 })->name('coral-ranieri');
-
-Route::get('/brincandodialogando', function () {
-    return Inertia::render('BrincandoDialogando/BrincandoDialogando');
-})->name('brincando-dialogando');
 
 Route::get('/simoninhanacozinha', function () {
     return Inertia::render('Simoninhanacozinha/Simoninhanacozinha');
