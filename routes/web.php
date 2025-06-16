@@ -15,12 +15,13 @@ Route::get('/', function () {
     return Inertia::render('Home');
 });
 
-/*
-// Outras rotas públicas (comentadas por enquanto)
+// Outras rotas públicas
 Route::get('/sobre-a-escola', function () {
     return Inertia::render('Sobre/SobreEscola');
-})->name('sobre-a-escola');
+})->name('sobre-a-escola'); // Rota para "Sobre a Escola" agora está ativa!
 
+/*
+// Outras rotas públicas (comentadas por enquanto)
 Route::get('/coralranieri', function () {
     return Inertia::render('Coral/CoralRanieri');
 })->name('coral-ranieri');
