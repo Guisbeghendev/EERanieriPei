@@ -77,8 +77,12 @@ Route::middleware('auth')->group(function () {
         ->middleware(['verified'])
         ->name('dashboard');
 
-    //---
-    ###Rotas de Perfil (Atualizadas)
+    // Remova as linhas com '---' e '###' que causem erro.
+    // Exemplo:
+    // ---
+    // ### **Rotas de Perfil (Atualizadas)**
+    // ---
+    // Apenas os comentários de barra dupla `//` ou de bloco `/* ... */` são válidos em PHP.
 
     // Rota para exibir o perfil do usuário
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -94,17 +98,21 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rotas específicas de fotógrafo
-    Route::middleware('role:fotografo')->group(function () {
+    // Protegida com o middleware 'check.permission' e a gate 'fotografo-only'
+    Route::middleware(['check.permission:gate,fotografo-only'])->group(function () {
         Route::get('/fotografo/dashboard', function () {
             return Inertia::render('Fotografo/Dashboard');
         })->name('fotografo.dashboard');
+        // Outras rotas do fotógrafo...
     });
 
     // Rotas específicas de administrador
-    Route::middleware('role:admin')->group(function () {
+    // Protegida com o middleware 'check.permission' e a gate 'admin-only'
+    Route::middleware(['check.permission:gate,admin-only'])->group(function () {
         Route::get('/admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');
+        // Outras rotas do administrador...
     });
 
     // Rota para galerias, acessível apenas por usuários autenticados
