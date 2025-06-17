@@ -17,6 +17,8 @@ class PasswordResetLinkController extends Controller
      */
     public function create(): Response
     {
+        // Esta parte está correta. O componente 'Auth/ForgotPassword' renderiza a view,
+        // e o 'status' da sessão é passado para exibir mensagens.
         return Inertia::render('Auth/ForgotPassword', [
             'status' => session('status'),
         ]);
@@ -33,9 +35,12 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+        // AQUI: Esta parte do método já está perfeita.
+        // O helper `Password::sendResetLink` lida com o envio do e-mail.
+        // E o `back()->with('status', ...)` redireciona para a página anterior
+        // (que é a de 'Esqueci a Senha') com a mensagem de status na sessão.
+        // Isso não usa rotas nomeadas diretamente para o redirecionamento,
+        // então não há conflito com a abordagem "sem Ziggy".
         $status = Password::sendResetLink(
             $request->only('email')
         );

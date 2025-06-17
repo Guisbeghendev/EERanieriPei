@@ -46,6 +46,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // AQUI: Alterado para uma URL literal, consistente com a abordagem "sem Ziggy".
+        // Isso garante que o redirecionamento pós-registro leve para a URL /dashboard.
+        return redirect('/dashboard');
     }
 }

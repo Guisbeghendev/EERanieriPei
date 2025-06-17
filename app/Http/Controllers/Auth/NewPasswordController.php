@@ -21,6 +21,8 @@ class NewPasswordController extends Controller
      */
     public function create(Request $request): Response
     {
+        // Esta parte está perfeita. Ela passa o email e o token para o frontend,
+        // que o componente 'Auth/ResetPassword' usará para pré-preencher campos.
         return Inertia::render('Auth/ResetPassword', [
             'email' => $request->email,
             'token' => $request->route('token'),
@@ -40,9 +42,8 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
+        // A lógica de resetar a senha via `Password::reset` está correta.
+        // O callback anônimo atualiza a senha do usuário e dispara o evento PasswordReset.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
@@ -55,13 +56,15 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
+        // AQUI: Este é o único ponto de ajuste.
+        // O original `redirect()->route('login')` usa uma rota nomeada.
+        // Para manter a consistência com a abordagem "sem Ziggy",
+        // vamos redirecionar para a URL literal de login.
         if ($status == Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __($status));
+            return redirect('/login')->with('status', __($status)); // Alterado para URL literal
         }
 
+        // Se o reset falhar, lança uma exceção de validação.
         throw ValidationException::withMessages([
             'email' => [trans($status)],
         ]);
