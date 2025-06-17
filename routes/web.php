@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController; // Para a verificação de e-mail
+// Importar o DashboardController
+use App\Http\Controllers\DashboardController; // <-- Adicione esta linha
 
 // --- ROTAS PÚBLICAS ---
 Route::get('/', function () {
@@ -60,27 +62,34 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.notice');
 
-    Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, 'verify'])
-        ->middleware(['signed', 'throttle:6,1'])
+    // Ação de verificação via link de e-mail (usando o método __invoke do VerifyEmailController)
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class) // <-- Ajuste aqui
+    ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
+    // Reenvio de e-mail de verificação (usando o método send do VerifyEmailController, se existir)
+    // Se o VerifyEmailController usar apenas __invoke, esta rota pode precisar de um método 'send' ou ser ajustada.
+    // Baseado no seu VerifyEmailController anterior, ele usa apenas __invoke, então esta rota precisaria de um ajuste ou remoção.
+    // Vamos assumir que ele tem um método 'send' para reenvio ou que a rota de reenvio será tratada pelo Inertia.
+    // Por enquanto, mantenho a original se você tiver o método 'send' no VerifyEmailController
     Route::post('email/verification-notification', [VerifyEmailController::class, 'send'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+
 
     // Rota para confirmar senha (necessária para acesso a certas seções ou ações sensíveis)
     Route::get('confirm-password', [AuthenticatedSessionController::class, 'confirmPassword'])
         ->name('password.confirm');
     Route::post('confirm-password', [AuthenticatedSessionController::class, 'storeConfirmedPassword']);
 
-    // Rota do Dashboard (ainda será implementada, mas já ativada para acesso)
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard'); // Assumindo que você terá uma Dashboard.vue
-    })->middleware(['verified'])->name('dashboard');
+    // Rota do Dashboard (agora apontando para o seu DashboardController)
+    Route::get('/dashboard', DashboardController::class) // <-- APONTA PARA O SEU CONTROLLER
+    ->middleware(['verified'])
+        ->name('dashboard');
 
-    // Exemplo de rota protegida que pode ter verificação de e-mail
+    // Exemplo de rota protegida para perfil (ainda não habilitada no navbar)
     Route::get('/profile', function () {
-        return Inertia::render('Profile/Show'); // Apenas um exemplo
+        return Inertia::render('Profile/Show');
     })->name('profile.show');
 
     // Rotas específicas de fotógrafo

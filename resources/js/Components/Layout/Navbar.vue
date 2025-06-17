@@ -42,11 +42,6 @@
                             <div v-if="dropdownOpen" class="absolute right-0 mt-16 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-50 transform opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 ease-out origin-top-right">
                                 <ul class="py-2 text-base text-gray-700 dark:text-gray-200">
                                     <li>
-                                        <Link href="/profile" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
-                                            Perfil
-                                        </Link>
-                                    </li>
-                                    <li>
                                         <Link :href="dashboardRoute" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
                                             Dashboard
                                         </Link>
