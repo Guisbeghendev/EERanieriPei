@@ -47,6 +47,11 @@
                                         </Link>
                                     </li>
                                     <li>
+                                        <Link href="/profile" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
+                                            Meu Perfil
+                                        </Link>
+                                    </li>
+                                    <li>
                                         <button @click="$inertia.post('/logout')" class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
                                             Sair
                                         </button>
@@ -70,6 +75,11 @@
                     <li v-if="$page.props.auth?.user">
                         <Link :href="dashboardRoute" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
                             Dashboard
+                        </Link>
+                    </li>
+                    <li v-if="$page.props.auth?.user">
+                        <Link href="/profile" class="inline-block py-2 px-5 rounded-full text-prata1 hover:bg-laranja2 md:hover:text-prata1 dark:hover:text-blue-500 transition-all duration-300 ease-in-out">
+                            Meu Perfil
                         </Link>
                     </li>
                     <li>

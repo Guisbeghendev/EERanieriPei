@@ -2,14 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-// Importações de Controllers de autenticação que agora serão usados
+// Importações de Controllers de autenticação
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\VerifyEmailController; // Para a verificação de e-mail
+use App\Http\Controllers\Auth\VerifyEmailController;
 // Importar o DashboardController
-use App\Http\Controllers\DashboardController; // <-- Adicione esta linha
+use App\Http\Controllers\DashboardController;
+// Importar o ProfileController
+use App\Http\Controllers\ProfileController;
 
 // --- ROTAS PÚBLICAS ---
 Route::get('/', function () {
@@ -37,7 +39,7 @@ Route::get('/coral-ranieri', function () {
     return Inertia::render('Coral/CoralRanieri');
 })->name('coral-ranieri');
 
-// --- ROTAS DE AUTENTICAÇÃO (Breeze Padrão - ATIVADAS) ---
+// --- ROTAS DE AUTENTICAÇÃO (Breeze Padrão) ---
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
@@ -52,9 +54,9 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
-// --- ROTAS AUTENTICADAS (COM LOGOUT E VERIFICAÇÃO DE E-MAIL) ---
+// --- ROTAS AUTENTICADAS ---
 Route::middleware('auth')->group(function () {
-    // Rota de Logout (ATIVADA)
+    // Rota de Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     // Rotas de verificação de e-mail (Laravel Breeze padrão)
@@ -62,42 +64,40 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.notice');
 
-    // Ação de verificação via link de e-mail (usando o método __invoke do VerifyEmailController)
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class) // <-- Ajuste aqui
-    ->middleware(['signed', 'throttle:6,1'])
+    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    // Reenvio de e-mail de verificação (usando o método send do VerifyEmailController, se existir)
-    // Se o VerifyEmailController usar apenas __invoke, esta rota pode precisar de um método 'send' ou ser ajustada.
-    // Baseado no seu VerifyEmailController anterior, ele usa apenas __invoke, então esta rota precisaria de um ajuste ou remoção.
-    // Vamos assumir que ele tem um método 'send' para reenvio ou que a rota de reenvio será tratada pelo Inertia.
-    // Por enquanto, mantenho a original se você tiver o método 'send' no VerifyEmailController
     Route::post('email/verification-notification', [VerifyEmailController::class, 'send'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-
-    // Rota para confirmar senha (necessária para acesso a certas seções ou ações sensíveis)
-    Route::get('confirm-password', [AuthenticatedSessionController::class, 'confirmPassword'])
-        ->name('password.confirm');
-    Route::post('confirm-password', [AuthenticatedSessionController::class, 'storeConfirmedPassword']);
-
-    // Rota do Dashboard (agora apontando para o seu DashboardController)
-    Route::get('/dashboard', DashboardController::class) // <-- APONTA PARA O SEU CONTROLLER
-    ->middleware(['verified'])
+    // Rota do Dashboard
+    Route::get('/dashboard', DashboardController::class)
+        ->middleware(['verified'])
         ->name('dashboard');
 
-    // Exemplo de rota protegida para perfil (ainda não habilitada no navbar)
-    Route::get('/profile', function () {
-        return Inertia::render('Profile/Show');
-    })->name('profile.show');
+    //---
+    ###Rotas de Perfil (Atualizadas)
+
+    // Rota para exibir o perfil do usuário
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
+    // Rota para exibir o formulário de edição do perfil
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    // Rota para atualizar o perfil (incluindo avatar e dados do profile)
+    // O Inertia.js envia como POST e usa _method=patch, que o Laravel interpreta como PATCH.
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Rota para deletar a conta
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rotas específicas de fotógrafo
     Route::middleware('role:fotografo')->group(function () {
         Route::get('/fotografo/dashboard', function () {
             return Inertia::render('Fotografo/Dashboard');
         })->name('fotografo.dashboard');
-        // Outras rotas do fotógrafo...
     });
 
     // Rotas específicas de administrador
@@ -105,11 +105,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');
-        // Outras rotas do administrador...
     });
 
     // Rota para galerias, acessível apenas por usuários autenticados
     Route::get('/galleries', function () {
-        return Inertia::render('Galleries/Index'); // Assumindo uma página de galerias
+        return Inertia::render('Galleries/Index');
     })->name('galleries.index');
+
+    // Rota para confirmar senha (necessária para acesso a certas seções ou ações sensíveis)
+    // Mantida para consistência com o Breeze, mesmo que não diretamente usada pelo seu Profile/Edit.vue principal.
+    Route::get('confirm-password', [AuthenticatedSessionController::class, 'confirmPassword'])
+        ->name('password.confirm');
+    Route::post('confirm-password', [AuthenticatedSessionController::class, 'storeConfirmedPassword']);
 });
