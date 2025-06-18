@@ -31,7 +31,7 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    // REMOVA OU COMENTE ESTE MÉTODO, POIS O AVATAR ESTARÁ NO MODELO USER AGORA.
+    // O relacionamento avatarRelation foi removido daqui
     // public function avatarRelation(): HasOne
     // {
     //     return $this->hasOne(Avatar::class);

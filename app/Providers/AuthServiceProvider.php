@@ -43,6 +43,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // SOMENTE ADMIN PODE EXECUTAR (CONVENÇÃO para funções administrativas gerais)
         Gate::define('admin-only', function (User $user) {
+            // Removido o die() de debug.
             return $user->hasRole('admin');
         });
 

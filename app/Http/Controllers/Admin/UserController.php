@@ -24,9 +24,8 @@ class UserController extends Controller
      */
     public function index(): Response
     {
-        // Carregando roles e groups para cada usuário
-        // Carregando também o perfil e a relação de avatar, para que possa ser exibido na lista, se necessário.
-        $users = User::with('roles', 'groups', 'profile.avatarRelation')->get();
+        // CORREÇÃO ESSENCIAL: Carregando 'profile' e 'avatar' separadamente no User
+        $users = User::with('roles', 'groups', 'profile', 'avatar')->get();
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
@@ -94,8 +93,8 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Cria o perfil do usuário
-            $profile = $user->profile()->create([
+            // Cria o perfil do usuário (pode ser null se campos estiverem vazios, dependendo da sua migração)
+            $user->profile()->create([
                 'birth_date' => $request->birth_date,
                 'address' => $request->address,
                 'city' => $request->city,
@@ -110,14 +109,14 @@ class UserController extends Controller
             if ($request->hasFile('avatar')) {
                 $uploadedAvatar = $request->file('avatar');
                 $storageDir = 'avatars';
-                // Usar o ID do perfil para nomear o arquivo garante unicidade por perfil
-                $filename = $profile->id . '.' . $uploadedAvatar->getClientOriginalExtension();
+                // Usar o ID do usuário para nomear o arquivo garante unicidade por usuário
+                $filename = $user->id . '.' . $uploadedAvatar->getClientOriginalExtension();
                 $pathSaved = $uploadedAvatar->storeAs($storageDir, $filename, 'public');
                 $publicUrlPath = Storage::url($pathSaved);
 
-                $profile->avatarRelation()->create([
+                $user->avatar()->create([ // CORREÇÃO: Criando avatar diretamente no User
                     'path' => $pathSaved,
-                    'url' => $publicUrlPath,
+                    'url' => $publicUrlPath, // O Accessor `getUrlAttribute` no modelo Avatar já cuida disso
                     'original_filename' => $uploadedAvatar->getClientOriginalName(),
                     'mime_type' => $uploadedAvatar->getMimeType(),
                     'size' => $uploadedAvatar->getSize(),
@@ -130,7 +129,6 @@ class UserController extends Controller
             $user->groups()->sync($request->input('groups', []));
 
             DB::commit();
-            // CORREÇÃO: Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após POST.
             return redirect()->route('admin.users.index')->with('success', 'Usuário criado com sucesso!')->withStatus(303);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -147,8 +145,9 @@ class UserController extends Controller
         $roles = Role::all(['id', 'name']);
         $groups = Group::all(['id', 'name']);
 
-        // Carregar o perfil do usuário e as relações de avatar, roles e groups
-        $user->load('profile.avatarRelation', 'roles', 'groups');
+        // CORREÇÃO ESSENCIAL: Carregar 'profile' e 'avatar' separadamente no User
+        $user->load('profile', 'roles', 'groups', 'avatar'); // Carregar avatar diretamente
+
         $userRoleIds = $user->roles->pluck('id')->toArray();
         $userGroupIds = $user->groups->pluck('id')->toArray();
 
@@ -158,7 +157,8 @@ class UserController extends Controller
             'groups' => $groups,
             'userRoleIds' => $userRoleIds,
             'userGroupIds' => $userGroupIds,
-            'profile' => $user->profile, // O perfil já está carregado com avatarRelation
+            'profile' => $user->profile, // O perfil já está carregado
+            'avatar' => $user->avatar, // Passando o objeto avatar diretamente
         ]);
     }
 
@@ -210,6 +210,7 @@ class UserController extends Controller
             ]);
 
             // Obtém ou cria o perfil do usuário
+            // A associação é feita pelo user_id automaticamente.
             $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
             // --- Lógica para o Avatar (para edição) ---
@@ -218,32 +219,32 @@ class UserController extends Controller
                 $storageDir = 'avatars';
 
                 // Se já existe um avatar associado, exclui o arquivo e o registro do banco de dados
-                if ($profile->avatarRelation) {
-                    if (Storage::disk('public')->exists($profile->avatarRelation->path)) {
-                        Storage::disk('public')->delete($profile->avatarRelation->path);
+                if ($user->avatar) { // CORREÇÃO ESSENCIAL: Acessa o avatar diretamente do User
+                    if (Storage::disk('public')->exists($user->avatar->path)) {
+                        Storage::disk('public')->delete($user->avatar->path);
                     }
-                    $profile->avatarRelation->delete(); // Exclui o registro do Avatar no banco de dados
+                    $user->avatar->delete(); // CORREÇÃO ESSENCIAL: Exclui o registro do Avatar no banco de dados diretamente do User
                 }
 
-                // Gera o nome do arquivo usando o ID do perfil
-                $filename = $profile->id . '.' . $uploadedAvatar->getClientOriginalExtension();
+                // Gera o nome do arquivo usando o ID do usuário
+                $filename = $user->id . '.' . $uploadedAvatar->getClientOriginalExtension();
                 $pathSaved = $uploadedAvatar->storeAs($storageDir, $filename, 'public');
                 $publicUrlPath = Storage::url($pathSaved);
 
-                // Cria um novo registro na tabela 'avatars' e associa ao perfil
-                $profile->avatarRelation()->create([
+                // Cria um novo registro na tabela 'avatars' e associa ao usuário
+                $user->avatar()->create([ // CORREÇÃO ESSENCIAL: Cria avatar diretamente no User
                     'path' => $pathSaved,
                     'url' => $publicUrlPath,
                     'original_filename' => $uploadedAvatar->getClientOriginalName(),
                     'mime_type' => $uploadedAvatar->getMimeType(),
                     'size' => $uploadedAvatar->getSize(),
                 ]);
-            } elseif ($request->boolean('remove_avatar') && $profile->avatarRelation) {
+            } elseif ($request->boolean('remove_avatar') && $user->avatar) { // CORREÇÃO ESSENCIAL: Acessa o avatar diretamente do User
                 // Se o usuário marcou para remover o avatar e um avatar existe
-                if (Storage::disk('public')->exists($profile->avatarRelation->path)) {
-                    Storage::disk('public')->delete($profile->avatarRelation->path);
+                if (Storage::disk('public')->exists($user->avatar->path)) {
+                    Storage::disk('public')->delete($user->avatar->path);
                 }
-                $profile->avatarRelation->delete(); // Exclui o registro do Avatar do banco de dados
+                $user->avatar->delete(); // CORREÇÃO ESSENCIAL: Exclui o registro do Avatar do banco de dados diretamente do User
             }
             // --- Fim da lógica Avatar ---
 
@@ -266,7 +267,6 @@ class UserController extends Controller
             $user->groups()->sync($request->input('groups', []));
 
             DB::commit();
-            // CORREÇÃO: Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após PUT/PATCH.
             return redirect()->route('admin.users.index')->with('success', 'Usuário atualizado com sucesso!')->withStatus(303);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -288,16 +288,16 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             // Se o usuário tiver um perfil com avatar, exclui o arquivo do disco antes de excluir o perfil/usuário
-            if ($user->profile && $user->profile->avatarRelation) {
-                if (Storage::disk('public')->exists($user->profile->avatarRelation->path)) {
-                    Storage::disk('public')->delete($user->profile->avatarRelation->path);
+            // CORREÇÃO ESSENCIAL: Acessa o avatar diretamente do User
+            if ($user->avatar) {
+                if (Storage::disk('public')->exists($user->avatar->path)) {
+                    Storage::disk('public')->delete($user->avatar->path);
                 }
             }
             // Devido ao onDelete('cascade') na migração do perfil, o perfil será excluído automaticamente.
             // O Avatar também será excluído via cascade se a foreign key estiver bem configurada.
             $user->delete();
             DB::commit();
-            // CORREÇÃO: Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após DELETE.
             return redirect()->route('admin.users.index')->with('success', 'Usuário excluído com sucesso!')->withStatus(303);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -386,7 +386,6 @@ class UserController extends Controller
                 }
             }
             DB::commit();
-            // CORREÇÃO: Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após POST.
             return redirect()->back()->with('success', 'Papéis associados aos usuários com sucesso!')->withStatus(303);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -465,7 +464,6 @@ class UserController extends Controller
                 }
             }
             DB::commit();
-            // CORREÇÃO: Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após POST.
             return redirect()->back()->with('success', 'Grupos associados aos usuários com sucesso!')->withStatus(303);
         } catch (\Exception $e) {
             DB::rollBack();

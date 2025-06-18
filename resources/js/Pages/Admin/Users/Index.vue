@@ -7,13 +7,16 @@ const props = defineProps({
 });
 
 const deleteUser = (userId) => {
+    // Mantendo confirm() conforme a diretiva do usuário
     if (confirm('Tem certeza de que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
-        router.delete(route('admin.users.destroy', userId), {
+        // Usando URL estática para a rota DELETE (SEM ZIGGY)
+        router.delete(`/admin/users/${userId}`, {
             onSuccess: () => {
                 // A página será recarregada automaticamente via Inertia
             },
             onError: (errors) => {
                 console.error('Erro ao excluir usuário:', errors);
+                // Mantendo alert() conforme a diretiva do usuário
                 alert('Erro ao excluir usuário. Verifique o console para mais detalhes.');
             },
         });
@@ -49,7 +52,8 @@ const deleteUser = (userId) => {
                                             </div>
                                         </div>
                                         <div class="flex space-x-2">
-                                            <Link :href="route('admin.users.edit', user.id)" class="text-indigo-600 hover:text-indigo-900 text-sm">
+                                            <!-- Link para Editar Usuário - SEM ZIGGY -->
+                                            <Link :href="`/admin/users/${user.id}/edit`" class="text-indigo-600 hover:text-indigo-900 text-sm">
                                                 Editar
                                             </Link>
                                             <button
@@ -67,10 +71,12 @@ const deleteUser = (userId) => {
                             </div>
 
                             <div class="mt-6 flex items-center space-x-4">
-                                <Link :href="route('admin.users.create')" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                <!-- Link para Criar Novo Usuário - SEM ZIGGY -->
+                                <Link href="/admin/users/create" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                                     Criar Novo Usuário
                                 </Link>
-                                <Link :href="route('admin.dashboard')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <!-- Link para Voltar ao Painel - SEM ZIGGY -->
+                                <Link href="/admin/dashboard" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Voltar ao Painel
                                 </Link>
                             </div>
