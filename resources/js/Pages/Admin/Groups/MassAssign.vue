@@ -22,9 +22,8 @@ const filterForm = useForm({
 watch(
     () => filterForm.data(),
     (newVal) => {
-        // Substituindo route() por URL direta para a rota de índice de associação em massa de grupos
-        // Certifique-se de que sua rota Laravel corresponda a esta URL
-        router.get('/admin/users/mass-assign-groups', newVal, { // <<<<<<<<<< CORRIGIDO AQUI
+        // CORREÇÃO: Substituindo route() por URL direta para a rota de índice de associação em massa de grupos
+        router.get('/admin/users/mass-assign-groups', newVal, {
             preserveState: true,
             replace: true,
             only: ['users', 'filters'], // Apenas atualiza 'users' e 'filters' na página atual
@@ -40,9 +39,8 @@ const clearFilters = () => {
 };
 
 const submit = () => {
-    // Substituindo route() por URL direta para a rota de store de associação em massa de grupos
-    // Certifique-se de que sua rota Laravel corresponda a esta URL (geralmente a mesma do index para POST)
-    form.post('/admin/users/mass-assign-groups', { // <<<<<<<<<< CORRIGIDO AQUI
+    // CORREÇÃO: Substituindo route() por URL direta para a rota de store de associação em massa de grupos
+    form.post('/admin/users/mass-assign-groups', {
         onSuccess: () => {
             form.reset('selected_user_ids', 'selected_group_ids');
             alert('Associação de grupos em massa realizada com sucesso!');
@@ -52,7 +50,6 @@ const submit = () => {
         onError: (errors) => {
             console.error('Erro ao associar grupos em massa:', errors);
             // Os erros de validação do backend (se houver) serão automaticamente expostos em form.errors
-            // e podem ser exibidos nos divs `v-if="form.errors...."`
             alert('Erro ao associar grupos em massa. Verifique o console para mais detalhes.');
         },
     });
@@ -143,6 +140,7 @@ const submit = () => {
                                 </div>
 
                                 <div class="flex items-center justify-end mt-4 space-x-4">
+                                    <!-- CORREÇÃO: Link para Voltar ao Painel Admin - SEM ZIGGY -->
                                     <Link href="/admin/dashboard" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                                         Voltar para o Painel Admin
                                     </Link>

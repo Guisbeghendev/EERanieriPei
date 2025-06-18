@@ -125,22 +125,20 @@ Route::middleware('auth')->group(function () {
         // Rotas de Recurso para Papéis (CRUD) - Agora terão nomes como 'admin.roles.index', etc.
         Route::resource('roles', RoleController::class);
 
-        // Rotas de Recurso para Usuários (CRUD) - AGORA TERÃO NOMES COMO 'admin.users.index', etc.
-        Route::resource('users', UserController::class);
-
+        // ROTAS DE ASSOCIAÇÃO EM MASSA (MAIS ESPECÍFICAS) DEVEM VIR ANTES DO RESOURCE DE USUÁRIOS
         // Rotas para Associação em Massa de Usuários a Grupos
-        // Nomes agora são 'users.mass-assign-groups.index' e 'users.mass-assign-groups.store'
-        // O prefixo 'admin.' será adicionado automaticamente pelo grupo.
-        Route::get('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'index'])
+        Route::get('/users/mass-assign-groups', [UserController::class, 'massAssignGroupsIndex'])
             ->name('users.mass-assign-groups.index');
-        Route::post('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'store'])
+        Route::post('/users/mass-assign-groups', [UserController::class, 'massAssignGroupsStore'])
             ->name('users.mass-assign-groups.store');
 
         // Rotas para Associação em Massa de Papéis a Usuários
-        // Essas rotas estavam comentadas. Assumindo que você quer ativá-las para o CRUD de Usuários.
         Route::get('/users/mass-assign-roles', [UserController::class, 'massAssignRolesIndex'])
             ->name('users.mass-assign-roles.index');
         Route::post('/users/mass-assign-roles', [UserController::class, 'massAssignRolesStore'])
             ->name('users.mass-assign-roles.store');
+
+        // Rotas de Recurso para Usuários (CRUD) - DEPOIS das rotas mais específicas
+        Route::resource('users', UserController::class);
     });
 });
