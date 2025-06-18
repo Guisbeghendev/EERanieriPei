@@ -12,7 +12,6 @@ trait HasRoles
      */
     public function roles(): BelongsToMany
     {
-        // CORREÇÃO: Removido ->withTimestamps() porque suas migrações 'role_user' e 'group_user' não incluem timestamps.
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
     }
 
@@ -24,6 +23,11 @@ trait HasRoles
      */
     public function hasRole(string|array $role): bool
     {
+        // Garante que a relação 'roles' esteja carregada.
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
         // Se $role for um array, verifica se o usuário tem ALGUMA das roles.
         if (is_array($role)) {
             foreach ($role as $r) {

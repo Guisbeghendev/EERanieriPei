@@ -13,6 +13,15 @@ use App\Http\Controllers\DashboardController;
 // Importar o ProfileController
 use App\Http\Controllers\ProfileController;
 
+// NOVOS IMPORTS
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\FotografoDashboardController;
+use App\Http\Controllers\Fotografo\GalleryController; // Do subdiretório
+
+// IMPORTS PARA ADMINISTRADOR
+use App\Http\Controllers\Admin\GroupController; // NOVO: Importa o GroupController
+use App\Http\Controllers\Admin\UserGroupAssignmentController; // FUTURO: Para a associação em massa de grupos
+
 // --- ROTAS PÚBLICAS ---
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -72,57 +81,59 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    // Rota do Dashboard
+    // Rota do Dashboard Geral
     Route::get('/dashboard', DashboardController::class)
         ->middleware(['verified'])
         ->name('dashboard');
 
-    // Remova as linhas com '---' e '###' que causem erro.
-    // Exemplo:
-    // ---
-    // ### **Rotas de Perfil (Atualizadas)**
-    // ---
-    // Apenas os comentários de barra dupla `//` ou de bloco `/* ... */` são válidos em PHP.
-
-    // Rota para exibir o perfil do usuário
+    // Rotas de Perfil do Usuário
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-
-    // Rota para exibir o formulário de edição do perfil
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-
-    // Rota para atualizar o perfil (incluindo avatar e dados do profile)
-    // O Inertia.js envia como POST e usa _method=patch, que o Laravel interpreta como PATCH.
+    // Para atualizar o perfil, Inertia.js envia POST com _method=patch, que Laravel interpreta como PATCH.
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Rota para deletar a conta
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rotas específicas de fotógrafo
-    // Protegida com o middleware 'check.permission' e a gate 'fotografo-only'
-    Route::middleware(['check.permission:gate,fotografo-only'])->group(function () {
-        Route::get('/fotografo/dashboard', function () {
-            return Inertia::render('Fotografo/Dashboard');
-        })->name('fotografo.dashboard');
-        // Outras rotas do fotógrafo...
-    });
-
-    // Rotas específicas de administrador
-    // Protegida com o middleware 'check.permission' e a gate 'admin-only'
-    Route::middleware(['check.permission:gate,admin-only'])->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return Inertia::render('Admin/Dashboard');
-        })->name('admin.dashboard');
-        // Outras rotas do administrador...
-    });
-
-    // Rota para galerias, acessível apenas por usuários autenticados
+    // Rota para galerias (acessível por qualquer usuário autenticado)
     Route::get('/galleries', function () {
         return Inertia::render('Galleries/Index');
     })->name('galleries.index');
 
     // Rota para confirmar senha (necessária para acesso a certas seções ou ações sensíveis)
-    // Mantida para consistência com o Breeze, mesmo que não diretamente usada pelo seu Profile/Edit.vue principal.
     Route::get('confirm-password', [AuthenticatedSessionController::class, 'confirmPassword'])
         ->name('password.confirm');
     Route::post('confirm-password', [AuthenticatedSessionController::class, 'storeConfirmedPassword']);
+
+    // --- GRUPO DE ROTAS DO FOTÓGRAFO ---
+    // Protegidas com o middleware 'check.permission' e a gate 'fotografo-only'
+    Route::prefix('fotografo')->middleware(['check.permission:gate,fotografo-only'])->group(function () {
+        Route::get('/dashboard', [FotografoDashboardController::class, 'index'])
+            ->name('fotografo.dashboard');
+        // Adicione outras rotas específicas do fotógrafo aqui, como gerenciamento de galerias/imagens
+    });
+
+    // --- GRUPO DE ROTAS DO ADMINISTRADOR ---
+    // Protegidas com o middleware 'check.permission' e a gate 'admin-only'
+    Route::prefix('admin')->middleware(['check.permission:gate,admin-only'])->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('admin.dashboard');
+
+        // Rotas de Recurso para Grupos (CRUD)
+        // Isso criará rotas como /admin/groups, /admin/groups/create, /admin/groups/{group}/edit, etc.
+        Route::resource('groups', GroupController::class);
+
+        // FUTURAS Rotas para Associação em Massa de Usuários a Grupos
+        // Você precisará de um UserGroupAssignmentController para isso.
+        // Route::get('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'index']); // GET para a página de seleção/filtro
+        // Route::post('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'store']); // POST para salvar a associação
+
+        // FUTURAS Rotas para Gerenciamento de Papéis (CRUD)
+        // Route::resource('roles', AdminRoleController::class);
+
+        // FUTURAS Rotas para Gerenciamento de Usuários (CRUD)
+        // Route::resource('users', AdminUserController::class);
+
+        // FUTURAS Rotas para Associação em Massa de Papéis a Usuários
+        // Route::get('/users/mass-assign-roles', [UserRoleAssignmentController::class, 'index']);
+        // Route::post('/users/mass-assign-roles', [UserRoleAssignmentController::class, 'store']);
+    });
 });
