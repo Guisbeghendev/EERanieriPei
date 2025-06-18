@@ -8,12 +8,17 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('admin.roles.store'), {
+    // Substituindo route() por URL estática para a rota POST (store)
+    form.post('/admin/roles', { // URL para o método store do RoleController
         onSuccess: () => {
             form.reset();
+            // O Inertia já vai redirecionar para a rota 'admin.roles.index'
+            // graças ao `return redirect()->route('admin.roles.index')->withStatus(303);` no controller.
         },
         onError: (errors) => {
             console.error('Erro ao criar papel:', errors);
+            // Os erros de validação serão automaticamente vinculados a `form.errors`
+            // e exibidos na interface, como você já configurou com `v-if="form.errors.name"`.
         },
     });
 };
@@ -60,7 +65,8 @@ const submit = () => {
                                 </div>
 
                                 <div class="flex items-center justify-end mt-4">
-                                    <Link :href="route('admin.roles.index')" class="text-gray-600 hover:text-gray-900 mr-4">
+                                    <!-- LINHA 63 APONTADA NO ERRO: Substituindo route() por URL estática -->
+                                    <Link href="/admin/roles" class="text-gray-600 hover:text-gray-900 mr-4">
                                         Cancelar
                                     </Link>
                                     <button

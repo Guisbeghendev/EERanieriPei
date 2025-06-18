@@ -9,6 +9,7 @@ use App\Models\Profile;
 use App\Models\Group;
 use App\Models\Gallery;
 use App\Models\Image;
+use App\Models\Role; // <-- Importação do modelo Role
 
 use App\Policies\UserPolicy;
 use App\Policies\ProfilePolicy;
@@ -139,6 +140,29 @@ class AuthServiceProvider extends ServiceProvider
             }
             // Se nenhum modelo for passado (ex: acesso a uma interface geral de upload de imagens)
             return $user->hasRole('fotografo');
+        });
+
+        // --- GATES PARA GERENCIAMENTO DE ROLES (PAPÉIS) ---
+        // Apenas admin pode ver a lista de papéis
+        Gate::define('view-roles', function (User $user) {
+            return $user->hasRole('admin');
+        });
+
+        // Apenas admin pode criar um novo papel
+        Gate::define('create-role', function (User $user) {
+            return $user->hasRole('admin');
+        });
+
+        // Apenas admin pode atualizar um papel existente
+        Gate::define('update-role', function (User $user, Role $role) {
+            // Admin pode atualizar qualquer papel, exceto o papel 'admin' (para evitar bloqueio acidental)
+            return $user->hasRole('admin') && $role->name !== 'admin';
+        });
+
+        // Apenas admin pode deletar um papel
+        Gate::define('delete-role', function (User $user, Role $role) {
+            // Admin pode deletar qualquer papel, exceto o papel 'admin' e o papel 'público' (essenciais do sistema)
+            return $user->hasRole('admin') && $role->name !== 'admin' && $role->name !== 'público';
         });
     }
 }

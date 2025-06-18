@@ -7,13 +7,16 @@ const props = defineProps({
 });
 
 const deleteRole = (roleId) => {
+    // Mantendo confirm() conforme a instrução do usuário
     if (confirm('Tem certeza de que deseja excluir este papel? Esta ação não pode ser desfeita.')) {
-        router.delete(route('admin.roles.destroy', roleId), {
+        // ROTAS CONSTRUÍDAS MANUALMENTE (SEM ZIGGY/route())
+        router.delete(`/admin/roles/${roleId}`, {
             onSuccess: () => {
                 // Redireciona para a mesma página, que recarregará a lista
             },
             onError: (errors) => {
                 console.error('Erro ao excluir papel:', errors);
+                // Mantendo alert() conforme a instrução do usuário
                 alert('Erro ao excluir papel. Verifique o console para mais detalhes.');
             },
         });
@@ -44,7 +47,8 @@ const deleteRole = (roleId) => {
                                             <div class="text-sm text-gray-500">{{ role.description }}</div>
                                         </div>
                                         <div class="flex space-x-2">
-                                            <Link :href="route('admin.roles.edit', role.id)" class="text-indigo-600 hover:text-indigo-900 text-sm">
+                                            <!-- Link para Editar Papel - SEM ZIGGY -->
+                                            <Link :href="`/admin/roles/${role.id}/edit`" class="text-indigo-600 hover:text-indigo-900 text-sm">
                                                 Editar
                                             </Link>
                                             <button
@@ -62,10 +66,12 @@ const deleteRole = (roleId) => {
                             </div>
 
                             <div class="mt-6 flex items-center space-x-4">
-                                <Link :href="route('admin.roles.create')" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                <!-- Link para Criar Novo Papel - SEM ZIGGY -->
+                                <Link :href="`/admin/roles/create`" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                                     Criar Novo Papel
                                 </Link>
-                                <Link :href="route('admin.dashboard')" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <!-- Link para Voltar ao Painel - SEM ZIGGY -->
+                                <Link :href="`/admin/dashboard`" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Voltar ao Painel
                                 </Link>
                             </div>

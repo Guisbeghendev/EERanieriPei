@@ -12,12 +12,16 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(route('admin.roles.update', props.role.id), {
+    // Substituindo route() por URL estática para a rota PUT (update)
+    form.put(`/admin/roles/${props.role.id}`, { // URL para o método update do RoleController
         onSuccess: () => {
-            // Redireciona para a lista de papéis após a atualização
+            // Redireciona para a lista de papéis após a atualização.
+            // O controller já deve redirecionar com 303, o que atualiza a lista.
         },
         onError: (errors) => {
             console.error('Erro ao atualizar papel:', errors);
+            // Os erros de validação serão automaticamente vinculados a `form.errors`
+            // e exibidos na interface.
         },
     });
 };
@@ -64,7 +68,8 @@ const submit = () => {
                                 </div>
 
                                 <div class="flex items-center justify-end mt-4">
-                                    <Link :href="route('admin.roles.index')" class="text-gray-600 hover:text-gray-900 mr-4">
+                                    <!-- LINHA 67 APONTADA NO ERRO: Substituindo route() por URL estática -->
+                                    <Link href="/admin/roles" class="text-gray-600 hover:text-gray-900 mr-4">
                                         Cancelar
                                     </Link>
                                     <button

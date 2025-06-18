@@ -19,8 +19,9 @@ use App\Http\Controllers\FotografoDashboardController;
 use App\Http\Controllers\Fotografo\GalleryController; // Do subdiretório
 
 // IMPORTS PARA ADMINISTRADOR
-use App\Http\Controllers\Admin\GroupController; // NOVO: Importa o GroupController
-use App\Http\Controllers\Admin\UserGroupAssignmentController; // FUTURO: Para a associação em massa de grupos
+use App\Http\Controllers\Admin\GroupController; // Importa o GroupController
+use App\Http\Controllers\Admin\UserGroupAssignmentController; // Importa o UserGroupAssignmentController
+use App\Http\Controllers\Admin\RoleController; // Importa o RoleController
 
 // --- ROTAS PÚBLICAS ---
 Route::get('/', function () {
@@ -112,25 +113,27 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- GRUPO DE ROTAS DO ADMINISTRADOR ---
-    // Protegidas com o middleware 'check.permission' e a gate 'admin-only'
-    Route::prefix('admin')->middleware(['check.permission:gate,admin-only'])->group(function () {
+    // ADICIONADO ->name('admin.') AQUI PARA PREFIXAR OS NOMES DAS ROTAS
+    Route::prefix('admin')->name('admin.')->middleware(['check.permission:gate,admin-only'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-            ->name('admin.dashboard');
+            ->name('dashboard'); // AGORA O NOME COMPLETO SERÁ 'admin.dashboard'
 
-        // Rotas de Recurso para Grupos (CRUD)
-        // Isso criará rotas como /admin/groups, /admin/groups/create, /admin/groups/{group}/edit, etc.
+        // Rotas de Recurso para Grupos (CRUD) - Agora terão nomes como 'admin.groups.index', etc.
         Route::resource('groups', GroupController::class);
 
-        // FUTURAS Rotas para Associação em Massa de Usuários a Grupos
-        // Você precisará de um UserGroupAssignmentController para isso.
-        // Route::get('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'index']); // GET para a página de seleção/filtro
-        // Route::post('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'store']); // POST para salvar a associação
+        // Rotas de Recurso para Papéis (CRUD) - Agora terão nomes como 'admin.roles.index', etc.
+        Route::resource('roles', RoleController::class);
 
-        // FUTURAS Rotas para Gerenciamento de Papéis (CRUD)
-        // Route::resource('roles', AdminRoleController::class);
+        // Rotas para Associação em Massa de Usuários a Grupos
+        // Nomes agora são 'users.mass-assign-groups.index' e 'users.mass-assign-groups.store'
+        // O prefixo 'admin.' será adicionado automaticamente pelo grupo.
+        Route::get('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'index'])
+            ->name('users.mass-assign-groups.index');
+        Route::post('/users/mass-assign-groups', [UserGroupAssignmentController::class, 'store'])
+            ->name('users.mass-assign-groups.store');
 
         // FUTURAS Rotas para Gerenciamento de Usuários (CRUD)
-        // Route::resource('users', AdminUserController::class);
+        // Route::resource('users', AdminUserController::class); // Será protegido por policies de User
 
         // FUTURAS Rotas para Associação em Massa de Papéis a Usuários
         // Route::get('/users/mass-assign-roles', [UserRoleAssignmentController::class, 'index']);
