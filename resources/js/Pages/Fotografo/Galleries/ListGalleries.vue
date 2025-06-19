@@ -43,7 +43,8 @@ const filterForm = useForm({
 
 // Funções para aplicar e resetar filtros
 const applyFilters = () => {
-    router.get(route('fotografo.galleries.index'), filterForm.data(), {
+    // CORREÇÃO: Substituindo route() por URL estática
+    router.get('/fotografo/galleries', filterForm.data(), {
         preserveState: true, // Mantém o estado da página
         replace: true,       // Substitui o histórico do navegador (sem criar nova entrada)
     });
@@ -82,7 +83,8 @@ const formatEventDate = (dateString) => {
 // Função para deletar galeria (reutilizando a lógica existente)
 const confirmDeleteGallery = (gallery) => {
     if (confirm(`Tem certeza que deseja deletar a galeria "${gallery.title}"? Todas as imagens e dados serão removidos.`)) {
-        router.delete(route('fotografo.galleries.destroy', gallery.id), {
+        // CORREÇÃO: Substituindo route() por URL estática
+        router.delete(`/fotografo/galleries/${gallery.id}`, {
             onSuccess: () => {
                 alert('Galeria excluída com sucesso!');
                 // A Inertia fará um reload, buscando a lista atualizada
@@ -109,7 +111,8 @@ const confirmDeleteGallery = (gallery) => {
                     <div class="p-6 text-gray-900">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-lg font-medium text-gray-900">Listagem de Galerias</h3>
-                            <Link :href="route('fotografo.galleries.create')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+                            <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                            <Link href="/fotografo/galleries/create" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
                                 Criar Nova Galeria
                             </Link>
                         </div>
@@ -166,13 +169,16 @@ const confirmDeleteGallery = (gallery) => {
                                         <span v-else class="text-gray-400">Nenhum grupo</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <Link :href="route('fotografo.galleries.upload-images', gallery.id)" class="text-indigo-600 hover:text-indigo-900 mr-4">
+                                        <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                                        <Link :href="`/fotografo/galleries/${gallery.id}/upload-images`" class="text-indigo-600 hover:text-indigo-900 mr-4">
                                             Upload Imagens
                                         </Link>
-                                        <Link :href="route('fotografo.galleries.edit', gallery.id)" class="text-blue-600 hover:text-blue-900 mr-4">
+                                        <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                                        <Link :href="`/fotografo/galleries/${gallery.id}/edit`" class="text-blue-600 hover:text-blue-900 mr-4">
                                             Editar
                                         </Link>
-                                        <Link :href="route('fotografo.galleries.show', gallery.id)" class="text-green-600 hover:text-green-900 mr-4">
+                                        <!-- CORREÇÃO: Substituindo route() por URL estática (para previewImages) -->
+                                        <Link :href="`/fotografo/galleries/${gallery.id}/preview`" class="text-green-600 hover:text-green-900 mr-4">
                                             Ver Imagens
                                         </Link>
                                         <button @click="confirmDeleteGallery(gallery)" class="text-red-600 hover:text-red-900">
@@ -200,9 +206,12 @@ const confirmDeleteGallery = (gallery) => {
                                     <span v-else class="text-gray-400">Nenhum grupo</span>
                                 </div>
                                 <div class="flex flex-wrap gap-2 text-sm font-medium mt-3">
-                                    <Link :href="route('fotografo.galleries.upload-images', gallery.id)" class="text-indigo-600 hover:text-indigo-900">Upload Imagens</Link>
-                                    <Link :href="route('fotografo.galleries.edit', gallery.id)" class="text-blue-600 hover:text-blue-900">Editar</Link>
-                                    <Link :href="route('fotografo.galleries.show', gallery.id)" class="text-green-600 hover:text-green-900">Ver Imagens</Link>
+                                    <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                                    <Link :href="`/fotografo/galleries/${gallery.id}/upload-images`" class="text-indigo-600 hover:text-indigo-900">Upload Imagens</Link>
+                                    <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                                    <Link :href="`/fotografo/galleries/${gallery.id}/edit`" class="text-blue-600 hover:text-blue-900">Editar</Link>
+                                    <!-- CORREÇÃO: Substituindo route() por URL estática (para previewImages) -->
+                                    <Link :href="`/fotografo/galleries/${gallery.id}/preview`" class="text-green-600 hover:text-green-900">Ver Imagens</Link>
                                     <button @click="confirmDeleteGallery(gallery)" class="text-red-600 hover:text-red-900">Deletar</button>
                                 </div>
                             </div>
@@ -210,7 +219,8 @@ const confirmDeleteGallery = (gallery) => {
 
                         <div v-else class="p-4 text-center text-gray-500">
                             Nenhuma galeria encontrada.
-                            <Link :href="route('fotografo.galleries.create')" class="text-indigo-600 hover:text-indigo-900 ml-1">
+                            <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                            <Link href="/fotografo/galleries/create" class="text-indigo-600 hover:text-indigo-900 ml-1">
                                 Crie uma agora!
                             </Link>
                         </div>

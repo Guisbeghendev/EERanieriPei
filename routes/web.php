@@ -95,11 +95,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rota para galerias (acessível por qualquer usuário autenticado)
-    Route::get('/galleries', function () {
-        return Inertia::render('Galleries/Index');
-    })->name('galleries.index');
-
     // Rota para confirmar senha (necessária para acesso a certas seções ou ações sensíveis)
     Route::get('confirm-password', [AuthenticatedSessionController::class, 'confirmPassword'])
         ->name('password.confirm');
@@ -111,7 +106,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', FotografoDashboardController::class)
             ->name('dashboard');
 
-        // ROTAS PARA O FLUXO DE CRIAÇÃO E UPLOAD DE GALERIAS (ADICIONADAS PASSO A PASSO)
+        // ROTAS PARA O FLUXO DE CRIAÇÃO E UPLOAD DE GALERIAS
+        // Rota para listar todas as galerias
+        Route::get('galleries', [GalleryController::class, 'index'])
+            ->name('galleries.index'); // O nome da rota será 'fotografo.galleries.index'
+
         // Rota para buscar marcas d'água disponíveis (usada no Create e UploadImg)
         Route::get('galleries/watermarks', [GalleryController::class, 'getAvailableWatermarks'])
             ->name('galleries.watermarks.index');
@@ -124,6 +123,18 @@ Route::middleware('auth')->group(function () {
         Route::post('galleries', [GalleryController::class, 'store'])
             ->name('galleries.store');
 
+        // Rota para exibir o formulário de edição de galeria
+        Route::get('galleries/{gallery}/edit', [GalleryController::class, 'edit'])
+            ->name('galleries.edit');
+
+        // Rota para atualizar uma galeria (Inertia usa POST com _method=patch, que Laravel interpreta como PATCH)
+        Route::match(['put', 'patch'], 'galleries/{gallery}', [GalleryController::class, 'update'])
+            ->name('galleries.update');
+
+        // Rota para deletar uma galeria
+        Route::delete('galleries/{gallery}', [GalleryController::class, 'destroy'])
+            ->name('galleries.destroy');
+
         // Rota para exibir a página de upload de imagens para uma galeria específica
         Route::get('galleries/{gallery}/upload-images', [GalleryController::class, 'uploadImages'])
             ->name('galleries.upload-images');
@@ -132,22 +143,31 @@ Route::middleware('auth')->group(function () {
         Route::post('galleries/{gallery}/images', [GalleryController::class, 'storeImage'])
             ->name('galleries.store-image');
 
+        // ROTAS PARA O FLUXO DE PREVIEW E DELEÇÃO DE IMAGENS
+        // Rota para exibir a página de preview de uma galeria
+        Route::get('galleries/{gallery}/preview', [GalleryController::class, 'previewImages'])
+            ->name('galleries.preview');
+
+        // Rota para deletar uma imagem específica de uma galeria
+        // {gallery} é o ID da galeria e {image} é o ID da imagem
+        Route::delete('galleries/{gallery}/images/{image}', [GalleryController::class, 'destroyImage'])
+            ->name('galleries.images.destroy');
+
         // Adicione outras rotas específicas do fotógrafo aqui, conforme necessário, passo a passo.
     });
 
     // --- GRUPO DE ROTAS DO ADMINISTRADOR ---
-    // ADICIONADO ->name('admin.') AQUI PARA PREFIXAR OS NOMES DAS ROTAS
     Route::prefix('admin')->name('admin.')->middleware(['check.permission:gate,admin-only'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-            ->name('dashboard'); // AGORA O NOME COMPLETO SERÁ 'admin.dashboard'
+            ->name('dashboard');
 
-        // Rotas de Recurso para Grupos (CRUD) - Agora terão nomes como 'admin.groups.index', etc.
+        // Rotas de Recurso para Grupos (CRUD)
         Route::resource('groups', GroupController::class);
 
-        // Rotas de Recurso para Papéis (CRUD) - Agora terão nomes como 'admin.roles.index', etc.
+        // Rotas de Recurso para Papéis (CRUD)
         Route::resource('roles', RoleController::class);
 
-        // ROTAS DE ASSOCIAÇÃO EM MASSA (MAIS ESPECÍFICAS) DEVEM VIR ANTES DO RESOURCE DE USUÁRIOS
+        // ROTAS DE ASSOCIAÇÃO EM MASSA (DEVEM VIR ANTES DO RESOURCE DE USUÁRIOS)
         // Rotas para Associação em Massa de Usuários a Grupos
         Route::get('/users/mass-assign-groups', [UserController::class, 'massAssignGroupsIndex'])
             ->name('users.mass-assign-groups.index');

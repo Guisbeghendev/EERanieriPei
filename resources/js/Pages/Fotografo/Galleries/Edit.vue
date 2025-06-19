@@ -7,7 +7,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Checkbox from '@/Components/Checkbox.vue';
-import { Link } from '@inertiajs/vue3'; // Para o botão de voltar/upload
+import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     gallery: Object, // A galeria a ser editada
@@ -15,13 +15,32 @@ const props = defineProps({
     selectedGroupIds: Array, // IDs dos grupos já associados à galeria
 });
 
+// Função auxiliar para formatar a data para YYYY-MM-DD
+const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.warn('Data inválida fornecida para formatDateForInput:', dateString);
+            return '';
+        }
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    } catch (e) {
+        console.error('Erro ao formatar data:', dateString, e);
+        return '';
+    }
+};
+
 // Formulário Inertia para os dados da galeria
 const form = useForm({
     _method: 'patch', // Importante para o Laravel entender que é uma atualização
     title: props.gallery.title,
     description: props.gallery.description,
-    event_date: props.gallery.event_date,
-    selected_group_ids: props.selectedGroupIds || [], // Certifique-se de ter um array
+    event_date: formatDateForInput(props.gallery.event_date), // APLICANDO A FORMATAÇÃO AQUI!
+    selected_group_ids: props.selectedGroupIds || [],
 });
 
 // Função para marcar/desmarcar grupos
@@ -36,12 +55,10 @@ const toggleGroup = (groupId) => {
 
 // Função para enviar o formulário de atualização
 const submit = () => {
-    form.post(route('fotografo.galleries.update', props.gallery.id), {
+    // Usando URL estática
+    form.post(`/fotografo/galleries/${props.gallery.id}`, {
         onSuccess: () => {
             alert('Galeria atualizada com sucesso!');
-            // Redireciona de volta para a lista de galerias após o sucesso
-            // Se preferir redirecionar para outro lugar, mude a rota
-            // Por exemplo, para a página de upload: route('fotografo.galleries.upload-images', props.gallery.id)
         },
         onError: (errors) => {
             console.error('Erro ao atualizar galeria:', errors);
@@ -52,7 +69,8 @@ const submit = () => {
 
 // Função para ir para a tela de upload de imagens da galeria atual
 const goToUploadImages = () => {
-    window.location.href = route('fotografo.galleries.upload-images', props.gallery.id);
+    // Usando URL estática
+    window.location.href = `/fotografo/galleries/${props.gallery.id}/upload-images`;
 };
 </script>
 
@@ -121,7 +139,8 @@ const goToUploadImages = () => {
                             </div>
 
                             <div class="flex items-center justify-between mt-6">
-                                <Link :href="route('fotografo.galleries.index')"
+                                <!-- Usando URL estática -->
+                                <Link href="/fotografo/galleries"
                                       class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Voltar
                                 </Link>

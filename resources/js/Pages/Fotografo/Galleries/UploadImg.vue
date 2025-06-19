@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { Head, Link } from '@inertiajs/vue3'; // Não precisa de useForm aqui, mas Link sim
+import { Head, Link } from '@inertiajs/vue3';
+import InputLabel from '@/Components/InputLabel.vue'; // IMPORTADO CORRETAMENTE E SEM DUPLICAÇÕES
 
 import axios from 'axios';
 
@@ -25,14 +26,14 @@ onMounted(() => {
     fetchWatermarks();
     if (!props.gallery || !props.gallery.id) {
         alert('ID da galeria não fornecido. Redirecionando.');
-        // CORREÇÃO: Usando URL estática
+        // Usando URL estática
         window.location.href = '/fotografo/dashboard'; // Redireciona se não tiver ID
     }
 });
 
 const fetchWatermarks = async () => {
     try {
-        // CORREÇÃO: Substituindo route() por URL estática
+        // Usando URL estática
         const response = await axios.get('/fotografo/galleries/watermarks');
         availableWatermarks.value = response.data;
         if (availableWatermarks.value.length > 0) {
@@ -116,14 +117,13 @@ const uploadImages = async () => {
         formData.append('gallery_id', props.gallery.id); // Certifique-se de enviar o gallery_id
 
         try {
-            // CORREÇÃO: Substituindo route() por URL estática
+            // Usando URL estática
             const response = await axios.post(
                 `/fotografo/galleries/${props.gallery.id}/images`, // URL estática
                 formData,
                 {
                     headers: {
                         'X-Watermark-File': selectedWatermark.value || '', // Envia a marca d'água selecionada
-                        // 'Content-Type': 'multipart/form-data', // Axios define isso automaticamente com FormData
                     },
                     withCredentials: true, // Importante para sessões e CSRF
                     onUploadProgress: (progressEvent) => {
@@ -154,7 +154,7 @@ const uploadImages = async () => {
 };
 
 const returnToDashboard = () => {
-    // CORREÇÃO: Usando URL estática
+    // Usando URL estática
     window.location.href = '/fotografo/dashboard';
 };
 </script>
@@ -230,10 +230,10 @@ const returnToDashboard = () => {
                                         class="flex items-center justify-between p-3 border rounded-md"
                                         :class="{
                                             // STATUS: FUNDO e BORDA
-                                            'bg-prata1 border-dourado1': file.status === 'success',    // SUCESSO: bg-prata1, border-dourado1
-                                            'bg-prata1 border-dourado1': file.status === 'error',      // ERRO: bg-prata1, border-dourado1
-                                            'bg-prata1 border-dourado1': file.status === 'uploading',  // ENVIANDO: bg-prata1, border-dourado1
-                                            'bg-prata1 border-dourado1': file.status === 'pending',    // PENDENTE: bg-prata1, border-dourado1
+                                            'bg-prata1 border-dourado1': file.status === 'success',
+                                            'bg-prata1 border-dourado1': file.status === 'error',
+                                            'bg-prata1 border-dourado1': file.status === 'uploading',
+                                            'bg-prata1 border-dourado1': file.status === 'pending',
                                         }">
                                         <div class="flex items-center flex-grow">
                                             <img v-if="file.thumb" :src="file.thumb" alt="Pré-visualização"
@@ -248,9 +248,9 @@ const returnToDashboard = () => {
                                                     <div class="h-2.5 rounded-full"
                                                          :class="{
                                                             // BARRA DE PROGRESSO
-                                                            'bg-laranja2': file.status === 'uploading', // ENVIANDO: bg-laranja2
-                                                            'bg-roxo2': file.status === 'success',     // SUCESSO: bg-roxo2
-                                                            'bg-vermelho1': file.status === 'error',   // ERRO: bg-vermelho1
+                                                            'bg-laranja2': file.status === 'uploading',
+                                                            'bg-roxo2': file.status === 'success',
+                                                            'bg-vermelho1': file.status === 'error',
                                                          }"
                                                          :style="{ width: file.progress + '%' }"></div>
                                                     <p class="text-xs text-gray-500 mt-1">{{ file.progress }}%</p>
@@ -258,8 +258,8 @@ const returnToDashboard = () => {
                                                 <p v-if="file.message" class="text-sm mt-1"
                                                    :class="{
                                                         // MENSAGENS DE STATUS
-                                                        'text-vermelho1': file.status === 'error',   // ERRO: text-vermelho1
-                                                        'text-roxo1': file.status === 'success',     // SUCESSO: text-roxo1
+                                                        'text-vermelho1': file.status === 'error',
+                                                        'text-roxo1': file.status === 'success',
                                                    }">
                                                     {{ file.message }}
                                                 </p>
@@ -285,15 +285,14 @@ const returnToDashboard = () => {
                             </div>
 
                             <div class="flex items-center justify-end mt-6 space-x-4">
-                                <!-- CORREÇÃO: Substituindo route() por URL estática -->
+                                <!-- Usando URL estática -->
                                 <Link href="/fotografo/dashboard"
                                       class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                       :disabled="isUploading">
                                     Voltar para o Dashboard
                                 </Link>
 
-                                <!-- AJUSTE AQUI: Botão 'Iniciar Upload de Imagens'
-                                     A cor do texto foi alterada para 'text-white' para garantir visibilidade. -->
+                                <!-- Botão 'Iniciar Upload de Imagens' -->
                                 <button @click="uploadImages"
                                         :disabled="isUploading || files.length === 0"
                                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs uppercase tracking-widest transition ease-in-out duration-150"

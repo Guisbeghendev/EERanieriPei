@@ -11,54 +11,39 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Jobs\ProcessImageWithGd; // Usando barra invertida para namespace
+use App\Jobs\ProcessImageWithGd;
 use App\Models\Image;
 
 class GalleryController extends Controller
 {
-    // REMOVIDO: O middleware 'auth' já é aplicado no nível da rota em web.php
-    /* public function __construct()
-    {
-        $this->middleware('auth');
-    } */
-
     /**
      * Exibe a lista de galerias com filtros.
      */
     public function index(Request $request)
     {
-        // Pega os filtros da requisição
         $filters = $request->only(['group_id', 'event_date']);
 
-        // Inicia a query para as galerias do fotógrafo logado
-        // Eager load 'groups' para evitar N+1 query problem na view
         $galleriesQuery = Gallery::where('user_id', Auth::id())
             ->with('groups');
 
-        // Aplica o filtro por group_id, se presente
         if (!empty($filters['group_id'])) {
             $galleriesQuery->whereHas('groups', function ($query) use ($filters) {
                 $query->where('groups.id', $filters['group_id']);
             });
         }
 
-        // Aplica o filtro por event_date, se presente
         if (!empty($filters['event_date'])) {
-            // whereDate compara apenas a data, ignorando a parte da hora
             $galleriesQuery->whereDate('event_date', $filters['event_date']);
         }
 
-        // Busca as galerias e as ordena pela data do evento, das mais recentes para as mais antigas
         $galleries = $galleriesQuery->orderBy('event_date', 'desc')->get();
 
-        // Pega todos os grupos para popular o campo de filtro na view
         $groups = Group::orderBy('name')->get(['id', 'name']);
 
-        // Renderiza a view Inertia, passando os dados necessários
-        return Inertia::render('Fotografo/Galleries/ListGalleries', [
+        return Inertia::render('Fotografo/Galleries/ListGalleries', [ // Mantido ListGalleries
             'galleries' => $galleries,
             'groups' => $groups,
-            'filters' => $filters, // Importante para preencher os campos de filtro na view
+            'filters' => $filters,
         ]);
     }
 
@@ -110,7 +95,7 @@ class GalleryController extends Controller
 
     /**
      * Exibe a página de upload de imagens para uma galeria específica.
-     * Esta é a view para o novo componente UploadImg.vue.
+     * Esta é a view para o componente UploadImg.vue.
      */
     public function uploadImages(Gallery $gallery)
     {
@@ -138,25 +123,17 @@ class GalleryController extends Controller
         $uploadedFile = $request->file('file');
         $originalFileName = $uploadedFile->getClientOriginalName();
 
-        // 1. Gera um nome de arquivo único para o arquivo temporário
         $uniqueFilename = Str::uuid() . '_' . Str::slug(pathinfo($originalFileName, PATHINFO_FILENAME)) . '.' . $uploadedFile->getClientOriginalExtension();
 
-        // 2. Define um diretório temporário interno (não público) dentro de storage/app
         $tempDir = 'uploads/temp_images';
-        Storage::disk('local')->makeDirectory($tempDir); // Garante que o diretório exista
+        Storage::disk('local')->makeDirectory($tempDir);
 
-        // 3. Armazena o arquivo temporariamente no disco 'local' (storage/app/uploads/temp_images)
-        // Isso é mais seguro para jobs da fila, pois não está em um local público que possa ser limpo
         $tempRelativePath = Storage::disk('local')->putFileAs($tempDir, $uploadedFile, $uniqueFilename);
 
-        // O nome do arquivo da marca d'água é lido do cabeçalho HTTP
         $watermarkFile = $request->header('X-Watermark-File');
 
-        // IMPORTANTE: Agora, dispara o job ProcessImageWithGd
-        // Passa o CAMINHO RELATIVO do arquivo temporário para o job
         ProcessImageWithGd::dispatch($tempRelativePath, (int) $gallery->id, $originalFileName, $watermarkFile);
 
-        // Retornar JSON (como já está) é a forma correta para o Inertia.js para uploads assíncronos.
         return response()->json(['success' => true, 'message' => 'Imagem enfileirada para processamento!']);
     }
 
@@ -202,9 +179,10 @@ class GalleryController extends Controller
     }
 
     /**
-     * Exibe os detalhes de uma galeria e suas imagens.
+     * Exibe os detalhes de uma galeria e suas imagens para preview.
+     * Mapeia para a rota GET fotografo/galleries/{gallery}/preview
      */
-    public function show(Gallery $gallery)
+    public function previewImages(Gallery $gallery) // Renomeado de 'show' para 'previewImages'
     {
         // Garante que o fotógrafo logado é o dono da galeria
         if ($gallery->user_id !== Auth::id()) {
@@ -214,6 +192,7 @@ class GalleryController extends Controller
         // Carrega as imagens relacionadas à galeria
         $gallery->load('images');
 
+        // Renderiza o componente PreviewImages.vue
         return Inertia::render('Fotografo/Galleries/PreviewImages', [
             'gallery' => $gallery,
         ]);
@@ -243,7 +222,7 @@ class GalleryController extends Controller
         $gallery->delete();
         // Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após DELETE.
         return redirect()->route('fotografo.galleries.index')
-            ->with('success', 'Galeria excluída com sucesso.')->withStatus(303);
+            ->with('success', 'Galeria excluída com sucesso!')->withStatus(303);
     }
 
     /**
@@ -285,9 +264,12 @@ class GalleryController extends Controller
         // Deleta o registro da imagem no banco de dados
         $image->delete();
 
-        // Adicionado ->withStatus(303) para que o Inertia.js lide corretamente com o redirecionamento após DELETE.
-        return redirect()->back()
-            ->with('success', 'Imagem excluída com sucesso!')->withStatus(303);
+        // Adiciona uma flash message para o Inertia.js exibir
+        session()->flash('success', 'Imagem excluída com sucesso!');
+
+        // Retorna um redirecionamento para a página anterior (PreviewImages.vue)
+        // Inertia.js lida com o redirecionamento e a flash message automaticamente.
+        return redirect()->back(); // Sem ->withStatus(303) aqui, pois redirect()->back() já é um 302/303 pelo Inertia.
     }
 
 
