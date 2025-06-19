@@ -13,10 +13,11 @@ use App\Http\Controllers\DashboardController;
 // Importar o ProfileController
 use App\Http\Controllers\ProfileController;
 
-// NOVOS IMPORTS
+// NOVOS IMPORTS DE DASHBOARDS E CONTROLLERS ESPECÍFICOS
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\FotografoDashboardController;
 use App\Http\Controllers\Fotografo\GalleryController; // Do subdiretório
+use App\Http\Controllers\PublicGalleryController; // NOVO: Importa o PublicGalleryController
 
 // IMPORTS PARA ADMINISTRADOR
 use App\Http\Controllers\Admin\GroupController; // Importa o GroupController
@@ -24,12 +25,12 @@ use App\Http\Controllers\Admin\UserGroupAssignmentController; // Importa o UserG
 use App\Http\Controllers\Admin\RoleController; // Importa o RoleController
 use App\Http\Controllers\Admin\UserController; // Importa o UserController
 
-// --- ROTAS PÚBLICAS ---
+// --- ROTAS PÚBLICAS GERAIS ---
 Route::get('/', function () {
     return Inertia::render('Home');
 });
 
-// Outras rotas públicas
+// Outras rotas públicas informativas
 Route::get('/sobre-a-escola', function () {
     return Inertia::render('Sobre/SobreEscola');
 })->name('sobre-a-escola');
@@ -64,6 +65,23 @@ Route::middleware('guest')->group(function () {
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
+
+// --- NOVAS ROTAS PÚBLICAS PARA GALERIAS (USUÁRIO FINAL) ---
+// Estas rotas NÃO estão dentro de middlewares 'auth' ou 'guest'
+// para permitir que o PublicGalleryController decida o acesso.
+Route::prefix('galleries')->name('public.galleries.')->group(function () {
+    // Rota principal para a seleção de grupos ou lista pública de galerias
+    Route::get('/', [PublicGalleryController::class, 'index'])->name('index');
+
+    // Rota para listar galerias por grupo (acessível via ID do grupo)
+    // Ex: /galleries/group/1
+    Route::get('/group/{group}', [PublicGalleryController::class, 'listByGroup'])->name('list-by-group');
+
+    // Rota para exibir os detalhes de uma galeria específica (e suas imagens)
+    // Ex: /galleries/10
+    Route::get('/{gallery}', [PublicGalleryController::class, 'show'])->name('show');
+});
+
 
 // --- ROTAS AUTENTICADAS ---
 Route::middleware('auth')->group(function () {
