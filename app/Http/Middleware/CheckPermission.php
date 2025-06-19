@@ -15,7 +15,7 @@ class CheckPermission
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string $permissionType   // Indica se é uma 'gate' ou 'policy'
-     * @param  string $permissionName   // O nome da gate (ex: 'admin-only') ou da ação da policy (ex: 'update')
+     * @param  string $permissionName   // O nome da gate (ex: 'admin-only', 'fotografo-only') ou da ação da policy (ex: 'update')
      * @param  string|null $modelParameter // Opcional: o nome do parâmetro da rota que representa o modelo (ex: 'gallery', 'user')
      */
     public function handle(Request $request, Closure $next, string $permissionType, string $permissionName, ?string $modelParameter = null): Response
@@ -27,18 +27,22 @@ class CheckPermission
 
         $user = Auth::user();
 
-        // INÍCIO DA CORREÇÃO APLICADA AQUI
-        // Para a permissão 'admin-only' via Gate, verificamos diretamente o hasRole('admin').
+        // INÍCIO DA CORREÇÃO APLICADA AQUI (Expandido para fotografo-only)
+        // Para permissões específicas de role via Gate, verificamos diretamente o hasRole().
         // Isso contorna o comportamento anômalo da Gate::allows() que estava retornando FALSE
-        // mesmo quando hasRole('admin') era TRUE.
+        // mesmo quando hasRole() era TRUE para essas Gates de role simples.
         if ($permissionType === 'gate' && $permissionName === 'admin-only') {
             if (! $user->hasRole('admin')) {
                 abort(403, 'Você não tem permissão para acessar esta funcionalidade.');
             }
+        } elseif ($permissionType === 'gate' && $permissionName === 'fotografo-only') { // <-- CORREÇÃO: Adicionado o bypass para 'fotografo-only'
+            if (! $user->hasRole('fotografo')) {
+                abort(403, 'Você não tem permissão para acessar esta funcionalidade.');
+            }
         }
-        // Lógica original para outras Gates (que não 'admin-only')
+        // Lógica original para outras Gates (que não 'admin-only' ou 'fotografo-only')
         elseif ($permissionType === 'gate') {
-            if (! Gate::allows($permissionName, $user)) {
+            if (! Gate::allows($permissionName, $user)) { // Para Gates mais complexas ou genéricas
                 abort(403, 'Você não tem permissão para acessar esta funcionalidade.');
             }
         }

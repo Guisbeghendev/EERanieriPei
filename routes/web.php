@@ -107,10 +107,32 @@ Route::middleware('auth')->group(function () {
 
     // --- GRUPO DE ROTAS DO FOTÓGRAFO ---
     // Protegidas com o middleware 'check.permission' e a gate 'fotografo-only'
-    Route::prefix('fotografo')->middleware(['check.permission:gate,fotografo-only'])->group(function () {
-        Route::get('/dashboard', [FotografoDashboardController::class, 'index'])
-            ->name('fotografo.dashboard');
-        // Adicione outras rotas específicas do fotógrafo aqui, como gerenciamento de galerias/imagens
+    Route::prefix('fotografo')->name('fotografo.')->middleware(['check.permission:gate,fotografo-only'])->group(function () {
+        Route::get('/dashboard', FotografoDashboardController::class)
+            ->name('dashboard');
+
+        // ROTAS PARA O FLUXO DE CRIAÇÃO E UPLOAD DE GALERIAS (ADICIONADAS PASSO A PASSO)
+        // Rota para buscar marcas d'água disponíveis (usada no Create e UploadImg)
+        Route::get('galleries/watermarks', [GalleryController::class, 'getAvailableWatermarks'])
+            ->name('galleries.watermarks.index');
+
+        // Rota para exibir o formulário de criação de galeria
+        Route::get('galleries/create', [GalleryController::class, 'create'])
+            ->name('galleries.create');
+
+        // Rota para armazenar a nova galeria (POST do formulário de criação)
+        Route::post('galleries', [GalleryController::class, 'store'])
+            ->name('galleries.store');
+
+        // Rota para exibir a página de upload de imagens para uma galeria específica
+        Route::get('galleries/{gallery}/upload-images', [GalleryController::class, 'uploadImages'])
+            ->name('galleries.upload-images');
+
+        // Rota para lidar com o upload de imagens individuais para uma galeria específica (POST de imagens)
+        Route::post('galleries/{gallery}/images', [GalleryController::class, 'storeImage'])
+            ->name('galleries.store-image');
+
+        // Adicione outras rotas específicas do fotógrafo aqui, conforme necessário, passo a passo.
     });
 
     // --- GRUPO DE ROTAS DO ADMINISTRADOR ---
