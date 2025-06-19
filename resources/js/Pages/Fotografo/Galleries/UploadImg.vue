@@ -229,10 +229,11 @@ const returnToDashboard = () => {
                                     <li v-for="file in files" :key="file.id"
                                         class="flex items-center justify-between p-3 border rounded-md"
                                         :class="{
-                                            'bg-blue-50 border-blue-200': file.status === 'uploading',
-                                            'bg-green-50 border-green-200': file.status === 'success',
-                                            'bg-red-50 border-red-200': file.status === 'error',
-                                            'bg-gray-50 border-gray-200': file.status === 'pending',
+                                            // STATUS: FUNDO e BORDA
+                                            'bg-prata1 border-dourado1': file.status === 'success',    // SUCESSO: bg-prata1, border-dourado1
+                                            'bg-prata1 border-dourado1': file.status === 'error',      // ERRO: bg-prata1, border-dourado1
+                                            'bg-prata1 border-dourado1': file.status === 'uploading',  // ENVIANDO: bg-prata1, border-dourado1
+                                            'bg-prata1 border-dourado1': file.status === 'pending',    // PENDENTE: bg-prata1, border-dourado1
                                         }">
                                         <div class="flex items-center flex-grow">
                                             <img v-if="file.thumb" :src="file.thumb" alt="Pré-visualização"
@@ -246,17 +247,19 @@ const returnToDashboard = () => {
                                                      class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
                                                     <div class="h-2.5 rounded-full"
                                                          :class="{
-                                                            'bg-blue-600': file.status === 'uploading',
-                                                            'bg-green-600': file.status === 'success',
-                                                            'bg-red-600': file.status === 'error',
+                                                            // BARRA DE PROGRESSO
+                                                            'bg-laranja2': file.status === 'uploading', // ENVIANDO: bg-laranja2
+                                                            'bg-roxo2': file.status === 'success',     // SUCESSO: bg-roxo2
+                                                            'bg-vermelho1': file.status === 'error',   // ERRO: bg-vermelho1
                                                          }"
                                                          :style="{ width: file.progress + '%' }"></div>
                                                     <p class="text-xs text-gray-500 mt-1">{{ file.progress }}%</p>
                                                 </div>
                                                 <p v-if="file.message" class="text-sm mt-1"
                                                    :class="{
-                                                        'text-red-500': file.status === 'error',
-                                                        'text-green-500': file.status === 'success',
+                                                        // MENSAGENS DE STATUS
+                                                        'text-vermelho1': file.status === 'error',   // ERRO: text-vermelho1
+                                                        'text-roxo1': file.status === 'success',     // SUCESSO: text-roxo1
                                                    }">
                                                     {{ file.message }}
                                                 </p>
@@ -271,9 +274,11 @@ const returnToDashboard = () => {
                                     </li>
                                 </ul>
 
-                                <div v-if="uploadErrors.length > 0" class="mt-4 p-4 border rounded bg-red-50">
-                                    <p class="font-semibold text-red-700">❌ Erros durante o upload:</p>
-                                    <ul class="list-disc ml-5 text-red-600">
+                                <div v-if="uploadErrors.length > 0"
+                                     class="mt-4 p-4 border rounded bg-vermelho1 border-dourado1">
+                                    <!-- BLOCO GERAL DE ERROS: Fundo vermelho1, Borda dourado1 -->
+                                    <p class="font-semibold text-vermelho1">❌ Erros durante o upload:</p>
+                                    <ul class="list-disc ml-5 text-vermelho1">
                                         <li v-for="(error, index) in uploadErrors" :key="index">{{ error }}</li>
                                     </ul>
                                 </div>
@@ -287,10 +292,17 @@ const returnToDashboard = () => {
                                     Voltar para o Dashboard
                                 </Link>
 
-                                <PrimaryButton @click="uploadImages" :class="{ 'opacity-25': isUploading || files.length === 0 }"
-                                               :disabled="isUploading || files.length === 0">
+                                <!-- AJUSTE AQUI: Botão 'Iniciar Upload de Imagens'
+                                     A cor do texto foi alterada para 'text-white' para garantir visibilidade. -->
+                                <button @click="uploadImages"
+                                        :disabled="isUploading || files.length === 0"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs uppercase tracking-widest transition ease-in-out duration-150"
+                                        :class="{
+                                            'opacity-25 cursor-not-allowed': isUploading || files.length === 0,
+                                            'bg-roxo2 text-white hover:bg-roxo1 focus:bg-roxo1 active:bg-roxo1 focus:outline-none focus:ring-2 focus:ring-roxo2 focus:ring-offset-2': !(isUploading || files.length === 0)
+                                        }">
                                     {{ isUploading ? 'Enviando Imagens...' : 'Iniciar Upload de Imagens' }}
-                                </PrimaryButton>
+                                </button>
                             </div>
                         </div>
                     </div>

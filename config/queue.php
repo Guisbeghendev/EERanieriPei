@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    'default' => env('QUEUE_CONNECTION', 'database'), // Mantenha isso com 'redis' no seu .env
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ return [
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
-            'block_for' => null,
+            'block_for' => 3, // <-- CORREÇÃO: Definido para 3 segundos para buscar novos jobs.
             'after_commit' => false,
         ],
 

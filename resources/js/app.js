@@ -5,7 +5,7 @@ import 'flowbite'; // Adicionada a importação do Flowbite
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
-// REMOVIDA: import { ZiggyVue } from '../../vendor/tightenco/ziggy'; // Confirma a remoção
+// A importação do ZiggyVue foi removida.
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,7 +19,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
             .use(plugin)
-            // REMOVIDA: .use(ZiggyVue) // Confirma a remoção
+            // A linha .use(ZiggyVue) foi removida.
             .mount(el);
     },
     progress: {
