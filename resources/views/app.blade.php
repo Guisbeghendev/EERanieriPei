@@ -12,7 +12,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    <!-- REMOVIDA A DIRETIVA @routes DO ZIGGY -->
+    <!-- Removida a diretiva @routes do Ziggy (se presente) - Correção de duplicação de scripts -->
     @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
     @inertiaHead
 </head>

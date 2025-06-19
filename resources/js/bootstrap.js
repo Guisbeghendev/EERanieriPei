@@ -1,23 +1,19 @@
+// Importa a biblioteca Axios para fazer requisições HTTP
 import axios from 'axios';
+
+// Atribui o Axios ao objeto global window, tornando-o acessível em toda a aplicação
 window.axios = axios;
 
+// Define um cabeçalho padrão para todas as requisições Axios, indicando que são requisições AJAX
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-/**
- * Adiciona o token CSRF (Cross-Site Request Forgery) aos cabeçalhos de todas as
- * requisições Axios. Isso é crucial para a segurança de formulários e requisições
- * POST/PUT/DELETE no Laravel, prevenindo o erro 419 (Page Expired).
- *
- * O token é geralmente injetado no HTML via uma meta tag:
- * <meta name="csrf-token" content="{{ csrf_token() }}">
- */
-let token = document.head.querySelector('meta[name="csrf-token"]');
+// Habilita o envio de credenciais (como cookies de sessão) em requisições cross-site.
+// ISSO É CRÍTICO PARA O CSRF E SESSÕES NO LARAVEL!
+window.axios.defaults.withCredentials = true;
 
-if (token) {
-    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-    // Isso é um aviso, pois o CSRF token é essencial para segurança.
-    // Garanta que a meta tag '<meta name="csrf-token" content="{{ csrf_token() }}">'
-    // esteja presente no cabeçalho do seu arquivo Blade principal (ex: app.blade.php).
-    console.error('CSRF token não encontrado: Garanta que a meta tag "csrf-token" esteja presente no cabeçalho do seu HTML.');
-}
+// REMOVIDO: A lógica manual para ler a meta tag e configurar o X-CSRF-TOKEN.
+// O Axios, por padrão, já lê o cookie 'XSRF-TOKEN' e o envia automaticamente
+// como o cabeçalho 'X-XSRF-TOKEN'. Laravel é capaz de validar ambos 'X-CSRF-TOKEN'
+// e 'X-XSRF-TOKEN'. A configuração manual de 'X-CSRF-TOKEN' estava causando
+// a inconsistência e o erro 419. Ao remover esta seção, confiamos no
+// mecanismo automático do Axios para enviar o token de forma consistente.

@@ -52,7 +52,8 @@
                                         </Link>
                                     </li>
                                     <li>
-                                        <button @click="$inertia.post('/logout')" class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
+                                        <!-- CORREÇÃO URGENTE DO ERRO 419: Chamada a um método local 'logout' -->
+                                        <button @click="logout" class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white transition-colors duration-200">
                                             Sair
                                         </button>
                                     </li>
@@ -134,7 +135,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { Link, usePage } from "@inertiajs/vue3";
+import { Link, usePage, router } from "@inertiajs/vue3"; // Importado 'router' para tratamento de erro
 
 const menuOpen = ref(false);
 const dropdownOpen = ref(false);
@@ -144,7 +145,7 @@ const page = usePage();
 
 const dashboardRoute = computed(() => {
     const user = page.props.auth?.user;
-    // Note: Certifique-se de que o backend esteja enviando os papéis do usuário
+    // Nota: Certifique-se de que o backend está enviando os papéis do usuário
     // na prop $page.props.auth.user.roles.
     if (user && user.roles) {
         if (user.roles.some(role => role.name === 'admin')) {
@@ -164,6 +165,31 @@ const toggleDropdown = () => {
 const handleClickOutside = (event) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
         dropdownOpen.value = false;
+    }
+};
+
+// NOVO MÉTODO PARA TRATAR O LOGOUT COM PREVENÇÃO DE ERRO 419
+const logout = async () => {
+    try {
+        await router.post('/logout', {}, {
+            onError: (errors) => {
+                // Se o erro for 419 (Page Expired) ou 401 (Unauthorized),
+                // recarrega a página para renovar a sessão e o token CSRF.
+                if (errors.response && (errors.response.status === 419 || errors.response.status === 401)) {
+                    console.error('Erro 419/401 detectado ao fazer logout. Recarregando a página para renovar a sessão...');
+                    window.location.reload(); // Força o recarregamento da página
+                    return false; // Impede que o Inertia continue o tratamento padrão do erro
+                } else {
+                    // Para outros erros de logout, apenas loga.
+                    console.error('Erro inesperado ao fazer logout:', errors);
+                    // Opcional: alertar o usuário para outros tipos de erro, se desejar
+                    // alert('Ocorreu um erro ao tentar sair. Por favor, tente novamente.');
+                }
+            }
+        });
+    } catch (e) {
+        // Este bloco catch pode capturar exceções de rede ou outros erros não-Inertia
+        console.error('Exceção inesperada durante a operação de logout:', e);
     }
 };
 
